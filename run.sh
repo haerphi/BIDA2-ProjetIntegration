@@ -1,15 +1,26 @@
 #!/bin/bash
 
+open_url() {
+    if command -v xdg-open > /dev/null; then 
+        # Linux (natif)
+        xdg-open "$1"
+    elif command -v open > /dev/null; then 
+        # Mac
+        open "$1"
+    else 
+        # Windows (Git Bash ou environnement natif)
+        start "$1"
+    fi
+}
+
 # check if the folders exists
 if [ ! -d "BIDA2-ProjetIntegration-API" ]; then
     echo "BIDA2-ProjetIntegration-API not found"
-    # git clone
     git clone https://github.com/haerphi/BIDA2-ProjetIntegration-API.git
 fi
 
 if [ ! -d "BIDA2-ProjetIntegration-Client" ]; then
     echo "BIDA2-ProjetIntegration-Client not found"
-    # git clone
     git clone https://github.com/haerphi/BIDA2-ProjetIntegration-Client.git
 fi
 
@@ -33,8 +44,16 @@ if [ ! -f "BIDA2-ProjetIntegration-API/.env" ]; then
 
     # Replace the GOOGLE_CLIENT_ID in the .env file
     sed -i "s/GOOGLE_CLIENT_ID=.*/GOOGLE_CLIENT_ID=$GOOGLE_CLIENT_ID/" BIDA2-ProjetIntegration-API/.env
-    # Append the GOOGLE_CLIENT_SECRET to the .env file
-    echo "GOOGLE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> BIDA2-ProjetIntegration-API/.env
+    
+    if grep -q "GOOGLE_CLIENT_SECRET=" BIDA2-ProjetIntegration-API/.env; then
+        sed -i "s/GOOGLE_CLIENT_SECRET=.*/GOOGLE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET/" BIDA2-ProjetIntegration-API/.env
+    else
+        # check if the file end with a new line
+        if [ -n "$(tail -c1 BIDA2-ProjetIntegration-API/.env)" ]; then
+            echo "" >> BIDA2-ProjetIntegration-API/.env
+        fi
+        echo "GOOGLE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> BIDA2-ProjetIntegration-API/.env
+    fi
 fi
 
 # Setup the .env for the client with the Google Client ID
@@ -56,5 +75,5 @@ while ! docker compose -p tennis-club ps | grep -q "Up"; do
 done
 
 # open the client & api docs in the browser
-start http://localhost:5173
-start http://localhost:8000/api/docs/
+open_url "http://localhost:5173"
+open_url "http://localhost:8000/api/docs/"
