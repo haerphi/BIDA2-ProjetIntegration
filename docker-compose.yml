@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   db:
     image: postgres:15-alpine
@@ -58,6 +56,19 @@ services:
     depends_on:
       - api
 
+  stripe-cli:
+    image: stripe/stripe-cli
+    container_name: bida2_stripe
+    restart: unless-stopped
+    env_file:
+      - ./BIDA2-ProjetIntegration-API/.env
+    volumes:
+      - stripe_config:/root/.config/stripe
+    depends_on:
+      - api
+    command: listen --forward-to http://api:8000/api/contributions/webhook/
+
 volumes:
   postgres_data:
   client_node_modules:
+  stripe_config:

@@ -4,7 +4,7 @@
 if [ ! -d "BIDA2-ProjetIntegration-API" ]; then
     echo "BIDA2-ProjetIntegration-API not found"
     # git clone
-    git clone https://github.com/haerphi/BIDA2-ProjetIntegration-API.git.
+    git clone https://github.com/haerphi/BIDA2-ProjetIntegration-API.git
 fi
 
 if [ ! -d "BIDA2-ProjetIntegration-Client" ]; then
