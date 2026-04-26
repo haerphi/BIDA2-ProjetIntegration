@@ -42,7 +42,14 @@ Le numéro d’affiliation est composé de 7 chiffres et peut pas commencer par 
 - [API](https://github.com/haerphi/BIDA2-ProjetIntegration-API)
 - [Client](https://github.com/haerphi/BIDA2-ProjetIntegration-Client)
 
-## Mise en palce DEV (automate)
+## Mise en place
+
+2 Mises en places sont possibles:
+
+- La mise en place via Docker (recommandé pour le développement)
+- La mise en place manuelle
+
+### Mise en palce DEV (automate)
 
 Le script vous demandera les clés Google et Stripe (voir les docs Stripe.md et Google.md sur la "Création des clés") et lancera tout.
 
@@ -52,7 +59,7 @@ Lancer le script `./run.sh`.
 sh ./run.sh
 ```
 
-## Mise en place DEV (manuel)
+### Mise en place DEV (manuel)
 
 1. Cloner les deux repositories l'un à côté de l'autre et garder leur nom de dossier
 2. Copier les fichiers .env.example en .env dans les deux projets
@@ -65,3 +72,17 @@ sh ./run.sh
      - VITE_GOOGLE_CLIENT_ID: `xxxxx.apps.googleusercontent.com`
 4. Lancer le `docker compose up -d --build` pour démarrer la base de données, Stripe en local, l'API et le client
 5. Accèder à l'application via `http://localhost:5173` ou à la documentation de l'API via `http://localhost:8000/api/docs/`
+
+## Create superuser
+
+Le superuser sera nécessaire pour accéder à l'admin de l'application (ce qui est nécessaire pour activer les membres et les terrains...).
+
+Si Environnement Docker:
+
+```bash
+  docker compose -p tennis-club exec -e DJANGO_SUPERUSER_PASSWORD="Test1234=" api python src/manage.py createsuperuser --affiliation_number admin --email admin@example.com --first_name Admin --last_name Admin --noinput
+```
+
+Si environnement Linux:
+
+TODO
