@@ -86,3 +86,23 @@ Si Environnement Docker:
 Si environnement Linux:
 
 TODO
+
+## Commencé à développer
+
+### Backend
+
+Il n'y a rien à faire pour le backend à part démarrer le projet.
+
+### Frontend
+
+Pour commencer à développer, il faut
+
+1. Installer les dépendances
+
+   ```bash
+   npm install
+   ```
+
+   Troubleshoot:
+   - S'assurer que l'utilisateur actuel a les droits d'exécution sur node_modules
+     Donner les droits avec la commande: `sudo chown -R $(whoami):$(whoami) node_modules`
