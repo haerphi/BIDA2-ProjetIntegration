@@ -35,15 +35,33 @@ caractérisé par un nom, prénom, adresse, numéro de téléphone, e-mail, date
 classement.
 Les classements possibles sont : A, B-15.4 ; B-15.2 ; B-15.1, B15, B-4/6, B-2/6 ; B0 ; B+2/6 ; B+4/6 ; C15 ;
 C15.1 ; C15.2 ; ;C15.3, c15.4 ; C30 ; C30.1, c30.2 ;C30.3 ;C30.4 ; C30.5, N.C
-Le numéro d’affiliation est composé de 7 chiffres et peut pas commencer par 0. 
+Le numéro d’affiliation est composé de 7 chiffres et peut pas commencer par 0.
 
 ## Repositories
 
 - [API](https://github.com/haerphi/BIDA2-ProjetIntegration-API)
 - [Client](https://github.com/haerphi/BIDA2-ProjetIntegration-Client)
 
-## Mise en place DEV
+## Mise en palce DEV (automate)
+
+Le script vous demandera les clés Google et Stripe (voir les docs Stripe.md et Google.md sur la "Création des clés") et lancera tout.
+
+Lancer le script `./run.sh`.
+
+```bash
+sh ./run.sh
+```
+
+## Mise en place DEV (manuel)
 
 1. Cloner les deux repositories l'un à côté de l'autre et garder leur nom de dossier
-2. Lancer le `docker compose up -d --build` pour démarrer la base de données, l'API et le client
-3. Accèder à l'application via `http://localhost:5173` 
+2. Copier les fichiers .env.example en .env dans les deux projets
+3. Modifier les variables d'environnement
+   - API:
+     - GOOGLE_CLIENT_ID: `xxxxx.apps.googleusercontent.com`
+     - STRIPE_API_KEY: `sk_test_xxxxx`
+     - STRIPE_WEBHOOK_SECRET: `whsec_xxxxx`
+   - Client:
+     - VITE_GOOGLE_CLIENT_ID: `xxxxx.apps.googleusercontent.com`
+4. Lancer le `docker compose up -d --build` pour démarrer la base de données, Stripe en local, l'API et le client
+5. Accèder à l'application via `http://localhost:5173` ou à la documentation de l'API via `http://localhost:8000/api/docs/`
