@@ -104,6 +104,22 @@ if [ "$STRIPE_WEBHOOK_SECRET_SET" = "false" ]; then
     done
 fi
 
+# Propose to create the admin user
+read -p "Do you want to create an admin user? (y/N)" create_admin
+if [ "$create_admin" = "y" ]; then
+    #Get the password
+    read -p "Enter the admin password: " admin_password
+    
+    #Use the command with 
+    docker compose -p tennis-club exec -e DJANGO_SUPERUSER_PASSWORD="$admin_password" api python src/manage.py createsuperuser --affiliation_number admin --email admin@example.com --first_name Admin --last_name Admin --noinput
+
+    echo "Admin user created!"
+    echo "Login with:
+        - email: admin@example.com
+        - affiliation_number: admin
+        - password: $admin_password"
+fi
+
 # Open urls
 echo "Opening urls..."
 open_url "http://localhost:5173"
