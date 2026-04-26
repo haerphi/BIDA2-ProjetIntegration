@@ -2,78 +2,111 @@
 
 open_url() {
     if command -v xdg-open > /dev/null; then 
-        # Linux (natif)
         xdg-open "$1"
     elif command -v open > /dev/null; then 
-        # Mac
         open "$1"
     else 
-        # Windows (Git Bash ou environnement natif)
         start "$1"
     fi
 }
 
-# check if the folders exists
+# $1: env var name,  $2: value, $3: .env file name,
+env_place() {
+    if grep -q "^$1=" "$3"; then
+        sed -i "s|^$1=.*|$1=$2|" "$3"
+    else
+        if [ -n "$(tail -c1 "$3")" ]; then
+            echo "" >> "$3"
+        fi
+        echo "$1=$2" >> "$3"
+    fi  
+}
+
+# $1: var name, $2: prompt, $3: file, $4: value
+env_check_or_ask() {
+    SECRET=$4
+
+    if [ -z "$SECRET" ]; then
+        read -p "$2" SECRET
+    fi
+    
+    # Check if user actually entered something
+    if [ -z "$SECRET" ]; then
+        return 1 # Return failure code if empty
+    fi
+
+    env_place "$1" "$SECRET" "$3"
+    return 0 # Return success code
+}
+
+# Clone repos
 if [ ! -d "BIDA2-ProjetIntegration-API" ]; then
-    echo "BIDA2-ProjetIntegration-API not found"
     git clone https://github.com/haerphi/BIDA2-ProjetIntegration-API.git
 fi
 
 if [ ! -d "BIDA2-ProjetIntegration-Client" ]; then
-    echo "BIDA2-ProjetIntegration-Client not found"
     git clone https://github.com/haerphi/BIDA2-ProjetIntegration-Client.git
 fi
 
-# wait for the folders to be created
-while [ ! -d "BIDA2-ProjetIntegration-API" ]; do
+while [ ! -d "BIDA2-ProjetIntegration-API" ] || [ ! -d "BIDA2-ProjetIntegration-Client" ]; do
     sleep 1
 done
 
-while [ ! -d "BIDA2-ProjetIntegration-Client" ]; do
-    sleep 1
-done
+backend_env="BIDA2-ProjetIntegration-API/.env"
+frontend_env="BIDA2-ProjetIntegration-Client/.env"
+STRIPE_WEBHOOK_SECRET_SET="true"
 
-# If the .env doesn't exist, copy the .env.example to .env
-if [ ! -f "BIDA2-ProjetIntegration-API/.env" ]; then
-    cp BIDA2-ProjetIntegration-API/.env.example BIDA2-ProjetIntegration-API/.env
-
-    # Ask the user for the google credentials
-    read -p "Enter the Google Client ID: " GOOGLE_CLIENT_ID
-    read -s -p "Enter the Google Client Secret: " GOOGLE_CLIENT_SECRET
-    echo
-
-    # Replace the GOOGLE_CLIENT_ID in the .env file
-    sed -i "s/GOOGLE_CLIENT_ID=.*/GOOGLE_CLIENT_ID=$GOOGLE_CLIENT_ID/" BIDA2-ProjetIntegration-API/.env
+if [ ! -f "$backend_env" ]; then
+    cp "$backend_env.example" "$backend_env"
     
-    if grep -q "GOOGLE_CLIENT_SECRET=" BIDA2-ProjetIntegration-API/.env; then
-        sed -i "s/GOOGLE_CLIENT_SECRET=.*/GOOGLE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET/" BIDA2-ProjetIntegration-API/.env
-    else
-        # check if the file end with a new line
-        if [ -n "$(tail -c1 BIDA2-ProjetIntegration-API/.env)" ]; then
-            echo "" >> BIDA2-ProjetIntegration-API/.env
-        fi
-        echo "GOOGLE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> BIDA2-ProjetIntegration-API/.env
+    env_check_or_ask "GOOGLE_CLIENT_ID" "Enter the Google Client ID: " "$backend_env"
+    env_check_or_ask "STRIPE_API_KEY" "Enter the Stripe API Key: " "$backend_env"
+    
+    # FIX: Call the function normally. If it fails (returns 1), set our flag.
+    STRIPE_WEBHOOK_SECRET_SET="true"
+    if ! env_check_or_ask "STRIPE_WEBHOOK_SECRET" "Enter the Stripe Webhook Secret (or press enter to extract from logs): " "$backend_env"; then
+        STRIPE_WEBHOOK_SECRET_SET="false"
+    fi
+else
+    if ! grep -q "STRIPE_WEBHOOK_SECRET=whsec_" "$backend_env"; then
+        STRIPE_WEBHOOK_SECRET_SET="false"
     fi
 fi
 
-# Setup the .env for the client with the Google Client ID
-if [ ! -f "BIDA2-ProjetIntegration-Client/.env" ]; then
-    if [ -f "BIDA2-ProjetIntegration-Client/.env.example" ]; then
-        cp BIDA2-ProjetIntegration-Client/.env.example BIDA2-ProjetIntegration-Client/.env
-    fi
-    API_GOOGLE_CLIENT_ID=$(grep GOOGLE_CLIENT_ID BIDA2-ProjetIntegration-API/.env | cut -d '=' -f2)
-    echo "" >> BIDA2-ProjetIntegration-Client/.env
-    echo "VITE_GOOGLE_CLIENT_ID=$API_GOOGLE_CLIENT_ID" >> BIDA2-ProjetIntegration-Client/.env
+if [ ! -f "$frontend_env" ]; then
+    cp "$frontend_env.example" "$frontend_env"
+    API_GOOGLE_CLIENT_ID=$(grep "GOOGLE_CLIENT_ID" "$backend_env" | cut -d '=' -f2)
+    sed -i "s|VITE_GOOGLE_CLIENT_ID=.*|VITE_GOOGLE_CLIENT_ID=$API_GOOGLE_CLIENT_ID|" "$frontend_env"
 fi
 
-# launch the docker compose
 docker compose -p tennis-club up -d --force-recreate
 
-# wait for the docker compose to be ready
 while ! docker compose -p tennis-club ps | grep -q "Up"; do
     sleep 1
 done
 
-# open the client & api docs in the browser
+# wait for stripe to be ready
+sleep 5
+
+# Extract webhook secret from logs if not set manually
+if [ "$STRIPE_WEBHOOK_SECRET_SET" = "false" ]; then
+    echo "Waiting for Stripe container logs..."
+    for i in {1..30}; do
+        # On essaie de récupérer le secret (vérifie bien le nom du container 'bida2_stripe')
+        STRIPE_WEBHOOK_SECRET=$(docker logs bida2_stripe 2>&1 | grep -o 'whsec_[a-zA-Z0-9]*' | head -n 1)
+        
+        if [ -n "$STRIPE_WEBHOOK_SECRET" ]; then
+            echo "Webhook secret found: $STRIPE_WEBHOOK_SECRET"
+            env_place "STRIPE_WEBHOOK_SECRET" "$STRIPE_WEBHOOK_SECRET" "$backend_env"
+            break
+        fi
+        sleep 1
+    done
+fi
+
+# Open urls
+echo "Opening urls..."
 open_url "http://localhost:5173"
 open_url "http://localhost:8000/api/docs/"
+
+echo "Everything should be running! Have fun with the application!"
