@@ -1,5 +1,16 @@
 #!/bin/bash
 
+# --help or -h will print the usage
+if [ "$1" = "--help" ] || [ "$1" = "-h" ]; then
+    echo "Usage: $0 [-r] [-d]"
+    echo "-r : Remove repositories (will check for uncommited changes and won't remove them)"
+    echo "-d : Force remove repositories (will check for uncommited changes and ask confirmation before removing them)"
+    echo ""
+    echo "This script will remove the containers, volumes, and images of the tennis-club project."
+    echo "It will also remove the repositories if -r or -d is used."
+    exit 0
+fi
+
 REMOVE_REPOSITORIES=false
 FORCE_REMOVE_REPOSITORIES=false
 

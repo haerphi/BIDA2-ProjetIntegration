@@ -62,7 +62,6 @@ if [ ! -f "$backend_env" ]; then
     env_check_or_ask "GOOGLE_CLIENT_ID" "Enter the Google Client ID: " "$backend_env"
     env_check_or_ask "STRIPE_API_KEY" "Enter the Stripe API Key: " "$backend_env"
     
-    # FIX: Call the function normally. If it fails (returns 1), set our flag.
     STRIPE_WEBHOOK_SECRET_SET="true"
     if ! env_check_or_ask "STRIPE_WEBHOOK_SECRET" "Enter the Stripe Webhook Secret (or press enter to extract from logs): " "$backend_env"; then
         STRIPE_WEBHOOK_SECRET_SET="false"
@@ -79,18 +78,22 @@ if [ ! -f "$frontend_env" ]; then
     sed -i "s|VITE_GOOGLE_CLIENT_ID=.*|VITE_GOOGLE_CLIENT_ID=$API_GOOGLE_CLIENT_ID|" "$frontend_env"
 fi
 
-docker compose -p tennis-club up -d --force-recreate
+# check if the containers are running
+if ! docker compose -p tennis-club ps | grep -q "Up"; then
+    echo "Starting containers..."
+    docker compose -p tennis-club up --build -d --force-recreate
+    while ! docker compose -p tennis-club ps | grep -q "Up"; do
+        sleep 1
+    done
 
-while ! docker compose -p tennis-club ps | grep -q "Up"; do
-    sleep 1
-done
-
-# wait for stripe to be ready
-sleep 5
+    # wait for 5s to be sure everything is ready
+    sleep 5
+    echo "Containers started!"
+fi
 
 # Extract webhook secret from logs if not set manually
 if [ "$STRIPE_WEBHOOK_SECRET_SET" = "false" ]; then
-    echo "Waiting for Stripe container logs..."
+    echo "Waiting for Stripe container logs to get the webhook secret..."
     for i in {1..30}; do
         # On essaie de récupérer le secret (vérifie bien le nom du container 'bida2_stripe')
         STRIPE_WEBHOOK_SECRET=$(docker logs bida2_stripe 2>&1 | grep -o 'whsec_[a-zA-Z0-9]*' | head -n 1)
