@@ -37,6 +37,24 @@ Les classements possibles sont : A, B-15.4 ; B-15.2 ; B-15.1, B15, B-4/6, B-2/6 
 C15.1 ; C15.2 ; ;C15.3, c15.4 ; C30 ; C30.1, c30.2 ;C30.3 ;C30.4 ; C30.5, N.C
 Le numéro d’affiliation est composé de 7 chiffres et peut pas commencer par 0.
 
+La catégorie est déterminée par l’âge et le sexe. Voici le tableau :
+
+| Catégorie Dame | Age | Catégorie Messieurs | Age | Exemple saison 2026 |
+| :--- | :--- | :--- | :--- | :--- |
+| JF/JG -9ans | <= 9 ans | | | Né(e) en 2017 ou après |
+| JF-11 ans | 10 ans et 11 ans | JG-11 ans | 10 ans et 11 ans | Né(e) en 2016 ou en 2015 |
+| JF-13 ans | 12 ans et 13 ans | JG-13 ans | 12 ans et 13 ans | Né(e) en 2014 ou en 2013 |
+| JF-15 ans | 14 ans et 15 ans | JG-15 ans | 14 ans et 15 ans | Né(e) en 2012 ou en 2011 |
+| JF-17 ans | 16 ans et 17 ans | JG-17 ans | 16 ans et 17 ans | Né(e) en 2010 ou en 2009 |
+| Dames 25 | 25 ans et plus | | | Né(e) en 2001 ou avant |
+| Dames 35 | 35 ans et plus | Messieurs 35 | 35 ans et plus | Né(e) en 1991 ou avant |
+| Dames 45 | 45 ans et plus | | | Née en 1981 ou avant |
+| Dames 55 | 55 ans et plus | Messieurs 55 | 55 ans et plus | Né(e) en 1971 ou avant |
+| | | Messieurs 60 | 60 ans et plus | Né en 1966 ou avant |
+| | | Messieurs 65 | 65 ans et plus | Né en 1961 ou avant |
+| | | Messieurs 70 | 70 ans et plus | Né en 1956 ou avant |
+| **Dames** | **16 ans et plus** | **Messieurs** | **16 ans et plus** | **Né(e) en 2010 et avant** |
+
 ## Repositories
 
 - [API](https://github.com/haerphi/BIDA2-ProjetIntegration-API)

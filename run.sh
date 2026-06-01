@@ -107,20 +107,40 @@ if [ "$STRIPE_WEBHOOK_SECRET_SET" = "false" ]; then
     done
 fi
 
-# Propose to create the admin user
-read -p "Do you want to create an admin user? (y/N)" create_admin
-if [ "$create_admin" = "y" ]; then
-    #Get the password
-    read -p "Enter the admin password: " admin_password
-    
-    #Use the command with 
-    docker compose -p tennis-club exec -e DJANGO_SUPERUSER_PASSWORD="$admin_password" api python src/manage.py createsuperuser --affiliation_number admin --email admin@example.com --first_name Admin --last_name Admin --noinput
+# Connect to pg database and check if the admin user exists
+echo "Checking if admin user already exists..."
+admin_exists=$(docker compose -p tennis-club exec -T db psql -U postgres -d tennis_db -t -c "SELECT EXISTS(SELECT 1 FROM members WHERE affiliation_number = 'admin');" 2>/dev/null | tr -d '[:space:]')
 
-    echo "Admin user created!"
-    echo "Login with:
-        - email: admin@example.com
-        - affiliation_number: admin
-        - password: $admin_password"
+if [ "$admin_exists" = "t" ]; then
+    echo "Admin user already exists in the database. Skipping creation."
+else
+    # Propose to create the admin user
+    read -p "Do you want to create an admin user? (y/N) " create_admin
+    if [ "$create_admin" = "y" ]; then
+        #Get the password
+        read -p "Enter the admin password: " admin_password
+        
+        #Use the command with 
+        docker compose -p tennis-club exec -e DJANGO_SUPERUSER_PASSWORD="$admin_password" api python src/manage.py createsuperuser --affiliation_number admin --email admin@example.com --first_name Admin --last_name Admin --noinput
+
+        echo "Admin user created!"
+        echo "Login with:
+            - email: admin@example.com
+            - affiliation_number: admin
+            - password: $admin_password"
+    fi
+fi
+
+# Connect to pg database and check if there is already basics data if not ask if the user wants to use the script (./scripts/seed.sql)
+member_count=$(docker compose -p tennis-club exec -T db psql -U postgres -d tennis_db -t -c "SELECT COUNT(*) FROM members;" 2>/dev/null | tr -d '[:space:]')
+
+if [[ "$member_count" =~ ^[0-9]+$ ]] && [ "$member_count" -le 3 ]; then
+    read -p "The members table has $member_count records (3 or less). Do you want to run the seed script? (y/N) " run_seed
+    if [ "$run_seed" = "y" ]; then
+        echo "Running seed script..."
+        docker compose -p tennis-club exec -T db psql -U postgres -d tennis_db < ./scripts/seed.sql >/dev/null
+        echo "Seeding completed successfully!"
+    fi
 fi
 
 # Open urls
