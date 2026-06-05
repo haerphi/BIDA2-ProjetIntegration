@@ -13,6 +13,7 @@ TRUNCATE TABLE "contribution" RESTART IDENTITY CASCADE;
 TRUNCATE TABLE "members_groups" RESTART IDENTITY CASCADE;
 TRUNCATE TABLE "courts" RESTART IDENTITY CASCADE;
 TRUNCATE TABLE "auth_group" RESTART IDENTITY CASCADE;
+TRUNCATE TABLE "categories" RESTART IDENTITY CASCADE;
 
 -- 1. Seed Groups in auth_group
 -- ID 1 is for admin role, ID 2 is for member role
@@ -20,11 +21,35 @@ INSERT INTO "auth_group" ("id", "name") VALUES
 (1, 'admin'),
 (2, 'member');
 
+-- Seed Categories
+INSERT INTO "categories" ("id", "name", "min_age", "max_age", "gender") VALUES
+(1, 'JF/JG -9ans', NULL, 9, NULL),
+(2, 'JF-11 ans', 10, 11, 'female'),
+(3, 'JG-11 ans', 10, 11, 'male'),
+(4, 'JF-13 ans', 12, 13, 'female'),
+(5, 'JG-13 ans', 12, 13, 'male'),
+(6, 'JF-15 ans', 14, 15, 'female'),
+(7, 'JG-15 ans', 14, 15, 'male'),
+(8, 'JF-17 ans', 16, 17, 'female'),
+(9, 'JG-17 ans', 16, 17, 'male'),
+(10, 'Dames 25', 25, NULL, 'female'),
+(11, 'Dames 35', 35, NULL, 'female'),
+(12, 'Messieurs 35', 35, NULL, 'male'),
+(13, 'Dames 45', 45, NULL, 'female'),
+(14, 'Dames 55', 55, NULL, 'female'),
+(15, 'Messieurs 55', 55, NULL, 'male'),
+(16, 'Messieurs 60', 60, NULL, 'male'),
+(17, 'Messieurs 65', 65, NULL, 'male'),
+(18, 'Messieurs 70', 70, NULL, 'male'),
+(19, 'Dames', 16, NULL, 'female'),
+(20, 'Messieurs', 16, NULL, 'male');
+
+
 -- 2. Seed Members
 -- Passwords are set to (SELECT password FROM "members" WHERE affiliation_number = 'admin') (plain text: 'password')
 INSERT INTO "members" (
     "id", "password", "last_login", "is_superuser", "first_name", "last_name",
-    "is_staff", "is_active", "date_joined", "email", "affiliation_number",
+    "is_staff", "is_active", "is_first_login", "date_joined", "email", "affiliation_number",
     "street", "city", "postal_code", "country", "phone", "birth_date",
     "gender", "google_subject_id", "ranking", "created_at"
 ) VALUES
@@ -37,9 +62,10 @@ INSERT INTO "members" (
     'Dupont',
     FALSE,
     TRUE,
+    TRUE,
     NOW() - INTERVAL '25 days',
     'jean.dupont@gmail.com',
-    'MEM001',
+    '1000001',
     '12 Rue de la Paix',
     'Paris',
     '75002',
@@ -48,7 +74,7 @@ INSERT INTO "members" (
     '1988-06-15',
     'male',
     NULL,
-    '15/2',
+    'C15.2',
     NOW() - INTERVAL '25 days'
 ),
 (
@@ -60,9 +86,10 @@ INSERT INTO "members" (
     'Dubois',
     FALSE,
     TRUE,
+    TRUE,
     NOW() - INTERVAL '20 days',
     'marie.dubois@gmail.com',
-    'MEM002',
+    '1000002',
     '45 Avenue des Champs-Élysées',
     'Paris',
     '75008',
@@ -71,7 +98,7 @@ INSERT INTO "members" (
     '1992-04-20',
     'female',
     NULL,
-    '4/6',
+    'B-4/6',
     NOW() - INTERVAL '20 days'
 ),
 (
@@ -83,9 +110,10 @@ INSERT INTO "members" (
     'Martin',
     FALSE,
     TRUE,
+    TRUE,
     NOW() - INTERVAL '15 days',
     'pierre.martin@gmail.com',
-    'MEM003',
+    '1000003',
     '8 Rue du Faubourg Saint-Antoine',
     'Paris',
     '75012',
@@ -94,7 +122,7 @@ INSERT INTO "members" (
     '1985-11-02',
     'male',
     NULL,
-    '30',
+    'C30',
     NOW() - INTERVAL '15 days'
 ),
 (
@@ -106,9 +134,10 @@ INSERT INTO "members" (
     'Lefevre',
     FALSE,
     TRUE,
+    TRUE,
     NOW() - INTERVAL '10 days',
     'sophie.lefevre@gmail.com',
-    'MEM004',
+    '1000004',
     '22 Rue de Rivoli',
     'Paris',
     '75004',
@@ -117,7 +146,7 @@ INSERT INTO "members" (
     '1995-09-30',
     'female',
     NULL,
-    '15/4',
+    'C15.4',
     NOW() - INTERVAL '10 days'
 ),
 (
@@ -129,9 +158,10 @@ INSERT INTO "members" (
     'Bernard',
     FALSE,
     FALSE, -- Inactive member
+    TRUE,
     NOW() - INTERVAL '5 days',
     'thomas.bernard@gmail.com',
-    'MEM005',
+    '1000005',
     '14 Boulevard Saint-Germain',
     'Paris',
     '75005',
@@ -140,7 +170,7 @@ INSERT INTO "members" (
     '1990-01-25',
     'male',
     NULL,
-    '30/1',
+    'C30.1',
     NOW() - INTERVAL '5 days'
 ),
 (
@@ -152,9 +182,10 @@ INSERT INTO "members" (
     'Legrand',
     FALSE,
     TRUE,
+    TRUE,
     NOW() - INTERVAL '4 days',
     'lucas.legrand@gmail.com',
-    'MEM006',
+    '1000006',
     '50 Rue de Rennes',
     'Paris',
     '75006',
@@ -163,7 +194,7 @@ INSERT INTO "members" (
     '1991-03-12',
     'male',
     NULL,
-    '15/1',
+    'C15.1',
     NOW() - INTERVAL '4 days'
 ),
 (
@@ -175,9 +206,10 @@ INSERT INTO "members" (
     'Petit',
     FALSE,
     TRUE,
+    TRUE,
     NOW() - INTERVAL '4 days',
     'emma.petit@gmail.com',
-    'MEM007',
+    '1000007',
     '3 Boulevard Haussmann',
     'Paris',
     '75009',
@@ -186,7 +218,7 @@ INSERT INTO "members" (
     '1994-07-22',
     'female',
     NULL,
-    '30/2',
+    'C30.2',
     NOW() - INTERVAL '4 days'
 ),
 (
@@ -198,9 +230,10 @@ INSERT INTO "members" (
     'Roux',
     FALSE,
     TRUE,
+    TRUE,
     NOW() - INTERVAL '3 days',
     'hugo.roux@gmail.com',
-    'MEM008',
+    '1000008',
     '18 Avenue d''Italie',
     'Paris',
     '75013',
@@ -209,7 +242,7 @@ INSERT INTO "members" (
     '1989-10-05',
     'male',
     NULL,
-    '15/5',
+    'C15.4',
     NOW() - INTERVAL '3 days'
 ),
 (
@@ -221,9 +254,10 @@ INSERT INTO "members" (
     'Barbier',
     FALSE,
     TRUE,
+    TRUE,
     NOW() - INTERVAL '3 days',
     'chloe.barbier@gmail.com',
-    'MEM009',
+    '1000009',
     '72 Avenue de la Grande Armée',
     'Paris',
     '75017',
@@ -244,9 +278,10 @@ INSERT INTO "members" (
     'Morel',
     FALSE,
     TRUE,
+    TRUE,
     NOW() - INTERVAL '2 days',
     'nathan.morel@gmail.com',
-    'MEM010',
+    '1000010',
     '95 Rue Lafayette',
     'Paris',
     '75010',
@@ -255,7 +290,7 @@ INSERT INTO "members" (
     '1996-02-28',
     'male',
     NULL,
-    '30/3',
+    'C30.3',
     NOW() - INTERVAL '2 days'
 ),
 (
@@ -267,9 +302,10 @@ INSERT INTO "members" (
     'Gerard',
     FALSE,
     TRUE,
+    TRUE,
     NOW() - INTERVAL '2 days',
     'zoe.gerard@gmail.com',
-    'MEM011',
+    '1000011',
     '142 Avenue Daumesnil',
     'Paris',
     '75012',
@@ -278,7 +314,7 @@ INSERT INTO "members" (
     '1997-08-19',
     'female',
     NULL,
-    '15/3',
+    'C15.3',
     NOW() - INTERVAL '2 days'
 ),
 (
@@ -290,9 +326,10 @@ INSERT INTO "members" (
     'Guerin',
     FALSE,
     TRUE,
+    TRUE,
     NOW() - INTERVAL '1 day',
     'enzo.guerin@gmail.com',
-    'MEM012',
+    '1000012',
     '88 Rue de Belleville',
     'Paris',
     '75020',
@@ -301,7 +338,7 @@ INSERT INTO "members" (
     '1990-05-30',
     'male',
     NULL,
-    '30/4',
+    'C30.4',
     NOW() - INTERVAL '1 day'
 ),
 (
@@ -313,9 +350,10 @@ INSERT INTO "members" (
     'Muller',
     FALSE,
     TRUE,
+    TRUE,
     NOW() - INTERVAL '1 day',
     'leia.muller@gmail.com',
-    'MEM013',
+    '1000013',
     '31 Rue de la Clef',
     'Paris',
     '75005',
@@ -324,7 +362,7 @@ INSERT INTO "members" (
     '1995-11-11',
     'female',
     NULL,
-    '30',
+    'C30',
     NOW() - INTERVAL '1 day'
 ),
 (
@@ -336,9 +374,10 @@ INSERT INTO "members" (
     'Lemoine',
     FALSE,
     TRUE,
+    TRUE,
     NOW() - INTERVAL '12 hours',
     'leo.lemoine@gmail.com',
-    'MEM014',
+    '1000014',
     '64 Rue Saint-Charles',
     'Paris',
     '75015',
@@ -347,7 +386,7 @@ INSERT INTO "members" (
     '1992-09-08',
     'male',
     NULL,
-    '15/4',
+    'C15.4',
     NOW() - INTERVAL '12 hours'
 ),
 (
@@ -359,9 +398,10 @@ INSERT INTO "members" (
     'Rousseau',
     FALSE,
     TRUE,
+    TRUE,
     NOW() - INTERVAL '6 hours',
     'lina.rousseau@gmail.com',
-    'MEM015',
+    '1000015',
     '112 Avenue de Flandre',
     'Paris',
     '75019',
@@ -370,19 +410,115 @@ INSERT INTO "members" (
     '1998-04-03',
     'female',
     NULL,
-    '30/1',
+    'C30.1',
     NOW() - INTERVAL '6 hours'
+),
+(
+    17,
+    (SELECT password FROM "members" WHERE affiliation_number = 'admin'),
+    NULL,
+    FALSE,
+    'Alice',
+    'Mercier',
+    FALSE,
+    TRUE,
+    TRUE,
+    NOW() - INTERVAL '1 day',
+    'alice.mercier@gmail.com',
+    '1000016',
+    '12 Rue des Lilas',
+    'Lyon',
+    '69001',
+    'France',
+    '+33622114455',
+    '2015-05-10',
+    'female',
+    NULL,
+    'NC',
+    NOW() - INTERVAL '1 day'
+),
+(
+    18,
+    (SELECT password FROM "members" WHERE affiliation_number = 'admin'),
+    NULL,
+    FALSE,
+    'Louis',
+    'Dupuis',
+    FALSE,
+    TRUE,
+    TRUE,
+    NOW() - INTERVAL '1 day',
+    'louis.dupuis@gmail.com',
+    '1000017',
+    '5 Place Bellecour',
+    'Lyon',
+    '69002',
+    'France',
+    '+33699881122',
+    '2013-08-12',
+    'male',
+    NULL,
+    'C30.4',
+    NOW() - INTERVAL '1 day'
+),
+(
+    19,
+    (SELECT password FROM "members" WHERE affiliation_number = 'admin'),
+    NULL,
+    FALSE,
+    'Catherine',
+    'Deneuve',
+    FALSE,
+    TRUE,
+    TRUE,
+    NOW() - INTERVAL '1 day',
+    'catherine.deneuve@gmail.com',
+    '1000018',
+    '88 Avenue Foch',
+    'Paris',
+    '75116',
+    'France',
+    '+33677553311',
+    '1979-02-14',
+    'female',
+    NULL,
+    'C15.1',
+    NOW() - INTERVAL '1 day'
+),
+(
+    20,
+    (SELECT password FROM "members" WHERE affiliation_number = 'admin'),
+    NULL,
+    FALSE,
+    'Jean-Pierre',
+    'Marielle',
+    FALSE,
+    TRUE,
+    TRUE,
+    NOW() - INTERVAL '1 day',
+    'jp.marielle@gmail.com',
+    '1000019',
+    '3 Avenue Montaigne',
+    'Paris',
+    '75008',
+    'France',
+    '+33688442200',
+    '1959-12-01',
+    'male',
+    NULL,
+    'C30.2',
+    NOW() - INTERVAL '1 day'
 );
 
 -- 3. Seed Group Mappings (members_groups)
 INSERT INTO "members_groups" ("member_id", "group_id") VALUES
 (1, 1), -- Admin in Admin group
-(2, 2), -- Jean in Member group
-(3, 2), -- Marie in Member group
-(4, 2), -- Pierre in Member group
-(5, 2), -- Sophie in Member group
-(6, 2), -- Thomas in Member group
-(7, 2),
+(2, 2),
+(3, 2),
+(4, 2),
+(5, 2),
+(6, 2),
+(7, 2), 
 (8, 2),
 (9, 2),
 (10, 2),
@@ -391,7 +527,11 @@ INSERT INTO "members_groups" ("member_id", "group_id") VALUES
 (13, 2),
 (14, 2),
 (15, 2),
-(16, 2);
+(16, 2),
+(17, 2),
+(18, 2),
+(19, 2),
+(20, 2);
 
 -- 4. Seed Courts
 INSERT INTO "courts" ("id", "name", "is_active") VALUES
@@ -419,7 +559,11 @@ INSERT INTO "contribution" ("id", "amount", "stripe_session_id", "status", "crea
 (11, 200.00, 'cs_test_a1b2c3d4e5_11', 'completed', NOW() - INTERVAL '1 day',   NOW() - INTERVAL '1 day',   13),
 (12, 200.00, 'cs_test_a1b2c3d4e5_12', 'completed', NOW() - INTERVAL '1 day',   NOW() - INTERVAL '1 day',   14),
 (13, 200.00, 'cs_test_a1b2c3d4e5_13', 'completed', NOW() - INTERVAL '12 hours', NOW() - INTERVAL '12 hours', 15),
-(14, 200.00, 'cs_test_a1b2c3d4e5_14', 'completed', NOW() - INTERVAL '6 hours',  NOW() - INTERVAL '6 hours',  16);
+(14, 200.00, 'cs_test_a1b2c3d4e5_14', 'completed', NOW() - INTERVAL '6 hours',  NOW() - INTERVAL '6 hours',  16),
+(15, 200.00, 'cs_test_a1b2c3d4e5_15', 'completed', NOW() - INTERVAL '1 day',   NOW() - INTERVAL '1 day',   17),
+(16, 200.00, 'cs_test_a1b2c3d4e5_16', 'completed', NOW() - INTERVAL '1 day',   NOW() - INTERVAL '1 day',   18),
+(17, 200.00, 'cs_test_a1b2c3d4e5_17', 'completed', NOW() - INTERVAL '1 day',   NOW() - INTERVAL '1 day',   19),
+(18, 200.00, 'cs_test_a1b2c3d4e5_18', 'completed', NOW() - INTERVAL '1 day',   NOW() - INTERVAL '1 day',   20);
 
 -- 6. Seed Reservations
 -- Reservation 1: Simple reservation between Jean and Marie (on Court Central today)
@@ -457,6 +601,7 @@ SELECT setval(pg_get_serial_sequence('courts', 'id'), COALESCE((SELECT max(id) F
 SELECT setval(pg_get_serial_sequence('contribution', 'id'), COALESCE((SELECT max(id) FROM contribution), 1));
 SELECT setval(pg_get_serial_sequence('reservation', 'id'), COALESCE((SELECT max(id) FROM reservation), 1));
 SELECT setval(pg_get_serial_sequence('reservation_players', 'id'), COALESCE((SELECT max(id) FROM reservation_players), 1));
+SELECT setval(pg_get_serial_sequence('categories', 'id'), COALESCE((SELECT max(id) FROM categories), 1));
 
 -- End transaction
 COMMIT;
